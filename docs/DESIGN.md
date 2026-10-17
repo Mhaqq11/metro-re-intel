@@ -40,9 +40,25 @@ Author: <Menelik Haqq> · Date: 2026-10-15 · Status: Draft
      raw, how it's transformed, where AI and agents act on it, and who
      consumes the result. -->
 
+
+
 ## 5. Data sources
 <!-- How often does each source actually update? Pull on that schedule,
      not more. Which are APIs and which are file downloads? -->
+     -----------------------------------------------------------------------------------------------------------------------------------------
+     |    Source          |                 What it provides                             |    Frequency |           Method                   |
+     -----------------------------------------------------------------------------------------------------------------------------------------
+     |FRED                |         30-year mortgage rate, inflation                     |    Weekly    |    REST API (JSON, free key)       |
+     -----------------------------------------------------------------------------------------------------------------------------------------
+     |Zillow Research     |         Rent Index(ZORI), home values(ZHVI)                  |    Monthly   |    Bulk CSV download               |
+     -----------------------------------------------------------------------------------------------------------------------------------------
+     |Census ACS          |         Income, population, demographics                     |    Annual    |    REST API(free key)              |
+     -----------------------------------------------------------------------------------------------------------------------------------------
+     |HUD Fair Market     |         Government rent benchmarks by bedroom count          |    Annual    |    Bulk file download              |
+     -----------------------------------------------------------------------------------------------------------------------------------------
+     |City permit portals |         Building permits(Chicago, Dallas, DC)                |    Daily     |    Open data APIs (Socrata, ArcGIS)|
+     -----------------------------------------------------------------------------------------------------------------------------------------
+
 
 ## 6. Key decisions
 <!-- One or two lines each, linking to the ADR in DECISIONS.md.
@@ -60,18 +76,27 @@ Author: <Menelik Haqq> · Date: 2026-10-15 · Status: Draft
      "one row = one ___." How will weekly rates and monthly rents meet? -->
 
      Star schema with conformed dimensions.
-
-     Table	                    Type	                         Grain (one row = …)
-     fact_rent_monthly	          Fact	                         one geography, one month
-     fact_rates_weekly	          Fact	                         one rate series, one week
-     fact_permits	               Fact	                         one building permit
-     fact_demographics_annual	     Fact	                         one geography, one survey year
-     fact_fmr_annual	          Fact	                         one geography, one fiscal year, one bedroom count
-     dim_geography	               Dimension	                    one metro, county, or ZIP, with a crosswalk of source IDs
-     dim_date	                    Dimension	                    one calendar day
-     dim_permit_category	          Dimension	                    one AI-assigned permit category
-     mart_metro_market_monthly	Mart                          one metro, one month
-
+     -------------------------------------------------------------------------------------------------------------------------
+     |Table                         |    Type      |        Grain (one row = …)                                              |
+     -------------------------------------------------------------------------------------------------------------------------
+     |fact_rent_monthly             |    Fact      |   one geography, one month                                              |
+     -------------------------------------------------------------------------------------------------------------------------
+     |fact_rates_weekly             |    Fact      |	one rate series, one week                                             |
+     -------------------------------------------------------------------------------------------------------------------------
+     |fact_permits                  |    Fact      |   one building permit                                                   |
+     -------------------------------------------------------------------------------------------------------------------------
+     |fact_demographics_annual      |    Fact      |   one geography, one survey year                                        |
+     -------------------------------------------------------------------------------------------------------------------------
+     |fact_fmr_annual               |    Fact      |   one geography, one fiscal year, one bedroom count                     |
+     -------------------------------------------------------------------------------------------------------------------------
+     |dim_geography                 |    Dimension |	one metro, county, or ZIP, with a crosswalk of source IDs             |
+     -------------------------------------------------------------------------------------------------------------------------
+     |dim_date                      |    Dimension |   one calendar day                                                      |
+     -------------------------------------------------------------------------------------------------------------------------
+     |dim_permit_category           |    Dimension |   one AI-assigned permit category                                       |
+     -------------------------------------------------------------------------------------------------------------------------
+     |mart_metro_market_monthly     |    Mart      |   one metro, one month                                                  |
+     -------------------------------------------------------------------------------------------------------------------------
 ## 8. Reliability and data quality
 <!-- How do you make sure nothing is lost or duplicated?
      - Idempotency: what happens if a run executes twice?
@@ -132,4 +157,10 @@ Author: <Menelik Haqq> · Date: 2026-10-15 · Status: Draft
 ## 12. Milestones
 <!-- One line per phase from your build guide, written as an outcome:
      "Phase 1: Chicago rate and rent data lands raw, safely, on demand." -->
-     
+     - Phase 0 (Week 1): Repo, Accounts, and project structure set up
+     - Phase 1 (Weeks 2-3): Chicago rate and rent data lands raw, safely, with one command.
+     - Phase 2 (Weeks 4-6): Tested dimensional model and first mart in DuckDB
+     - Phase 3 (Weeks 7-8): Scheduled, cloud-deployed pipeline covering all three metroes and sources.
+     - Phase 4 (Weeks 9-10): AI permit classification with measured accuracy
+     - Phase 5 (Weeks 11-12): Reliability and market brief agents with guardrails and evaluation.
+     - Phase 6 (Weeks 13-14): Dashboard, ask-your-data assistant, and public write-up
